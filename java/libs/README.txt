@@ -1,0 +1,1 @@
+Copy classes.jar from <UNITY_DIR>/Editor/Data/PlaybackEngines/androidplayer/bin here.

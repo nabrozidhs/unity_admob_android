@@ -1,23 +1,26 @@
 package com.nabrozidhs.admob;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
-
 import android.app.Activity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 
-public final class AdMob {
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.unity3d.player.UnityPlayer;
+
+public final class AdMob extends AdListener {
 
     private static final String TAG = AdMob.class.getSimpleName();
 
     private final Activity mActivity;
     private final AdView mAdView;
-
+    private final String mCallbackName;
+    
     /**
      * Constructor for the AdMob class that holds the ads.
      * 
@@ -30,38 +33,51 @@ public final class AdMob {
      * @param isTopPosition
      *            True to position the ad at the top of the screen. False to
      *            position the ad at the bottom of the screen.
+     * @param callbackName
+     *            the game object that should listen for ad events.
      */
-    public AdMob(final Activity activity, final String adUnitId,
-            final String adSize, final boolean isTopPosition) {
+    public AdMob(final Activity activity, final String adUnitId, final String adSize,
+            final boolean isTopPosition, final String callbackName) {
         mActivity = activity;
-
+        mCallbackName = callbackName;
+        
         mAdView = new AdView(activity);
         mAdView.setAdSize(parseAdSize(adSize));
         mAdView.setAdUnitId(adUnitId);
-
-        activity.runOnUiThread(new Runnable() {
-
+        mAdView.setVisibility(View.GONE);
+        mAdView.setAdListener(this);
+        
+        mActivity.runOnUiThread(new Runnable() {
+            
             @Override
             public void run() {
                 final LinearLayout layout = new LinearLayout(activity);
-                final FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT);
-                final LinearLayout.LayoutParams adParams = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.MATCH_PARENT);
-
+                final LayoutParams layoutParams = new LayoutParams(
+                        LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
                 layoutParams.gravity = isTopPosition ? Gravity.TOP : Gravity.BOTTOM;
-
-                activity.addContentView(layout, layoutParams);
-                layout.addView(mAdView, adParams);
-
-                // Request an Ad (it won't show).
-                mAdView.loadAd(new AdRequest.Builder().build());
+                
+                mActivity.addContentView(layout, layoutParams);
+                layout.addView(mAdView, new LayoutParams(
+                        LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
             }
         });
     }
 
+    /**
+     * Request an ad.
+     */
+    public void requestAd() {
+        Log.d(TAG, "Requesting an ad.");
+        
+        mActivity.runOnUiThread(new Runnable() {
+            
+            @Override
+            public void run() {
+                mAdView.loadAd(new AdRequest.Builder().build());
+            }
+        });
+    }
+    
     /**
      * Shows the banner to the user.
      */
@@ -90,6 +106,13 @@ public final class AdMob {
                 mAdView.setVisibility(View.GONE);
             }
         });
+    }
+    
+    @Override
+    public void onAdLoaded() {
+        if (mCallbackName != null) {
+            UnityPlayer.UnitySendMessage(mCallbackName, "OnAdLoaded", "");
+        }
     }
     
     /**
