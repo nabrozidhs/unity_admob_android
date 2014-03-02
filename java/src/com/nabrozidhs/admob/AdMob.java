@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
@@ -80,13 +80,13 @@ public final class AdMob extends AdListener {
             @Override
             public void run() {
                 final LinearLayout layout = new LinearLayout(activity);
-                final LayoutParams layoutParams = new LayoutParams(
-                        LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+                final FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
                 layoutParams.gravity = isTopPosition ? Gravity.TOP : Gravity.BOTTOM;
                 
                 mActivity.addContentView(layout, layoutParams);
-                layout.addView(mAdView, new LayoutParams(
-                        LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+                layout.addView(mAdView, new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
             }
         });
     }
