@@ -11,6 +11,7 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.unity3d.player.UnityPlayer;
 
 public final class AdMob extends AdListener {
@@ -19,6 +20,7 @@ public final class AdMob extends AdListener {
 
     private final Activity mActivity;
     private final AdView mAdView;
+    private final InterstitialAd mInterstitial;
     private final String mCallbackName;
     
     /**
@@ -33,11 +35,13 @@ public final class AdMob extends AdListener {
      * @param isTopPosition
      *            True to position the ad at the top of the screen. False to
      *            position the ad at the bottom of the screen.
+     * @param interstitialId
+     *            Your interstitial ID from the AdMob console.
      * @param callbackName
      *            the game object that should listen for ad events.
      */
     public AdMob(final Activity activity, final String adUnitId, final String adSize,
-            final boolean isTopPosition, final String callbackName) {
+            final boolean isTopPosition, final String interstitialId, final String callbackName) {
         mActivity = activity;
         mCallbackName = callbackName;
         
@@ -45,7 +49,31 @@ public final class AdMob extends AdListener {
         mAdView.setAdSize(parseAdSize(adSize));
         mAdView.setAdUnitId(adUnitId);
         mAdView.setVisibility(View.GONE);
-        mAdView.setAdListener(this);
+        mAdView.setAdListener(new AdListener() {
+            
+            @Override
+            public void onAdLoaded() {
+                if (mCallbackName != null) {
+                    UnityPlayer.UnitySendMessage(mCallbackName, "OnAdLoaded", "");
+                }
+            }
+        });
+        
+        if (interstitialId != null && interstitialId.length() != 0) {
+            mInterstitial = new InterstitialAd(activity);
+            mInterstitial.setAdUnitId(interstitialId);
+            mInterstitial.setAdListener(new AdListener() {
+                
+                @Override
+                public void onAdLoaded() {
+                    if (mCallbackName != null) {
+                        UnityPlayer.UnitySendMessage(mCallbackName, "OnInterstitialLoaded", "");
+                    }
+                }
+            });
+        } else {
+            mInterstitial = null;
+        }
         
         mActivity.runOnUiThread(new Runnable() {
             
@@ -74,6 +102,25 @@ public final class AdMob extends AdListener {
             @Override
             public void run() {
                 mAdView.loadAd(new AdRequest.Builder().build());
+            }
+        });
+    }
+    
+    /**
+     * Request an interstitial ad.
+     */
+    public void requestInterstitial() {
+        if (mInterstitial == null) {
+            return;
+        }
+        
+        Log.d(TAG, "Requesting an interstitial ad.");
+        
+        mActivity.runOnUiThread(new Runnable() {
+            
+            @Override
+            public void run() {
+                mInterstitial.loadAd(new AdRequest.Builder().build());
             }
         });
     }
@@ -108,11 +155,25 @@ public final class AdMob extends AdListener {
         });
     }
     
-    @Override
-    public void onAdLoaded() {
-        if (mCallbackName != null) {
-            UnityPlayer.UnitySendMessage(mCallbackName, "OnAdLoaded", "");
+    /**
+     * Shows the interstitial ad to the user.
+     */
+    public void showInterstitial() {
+        if (mInterstitial == null) {
+            return;
         }
+        
+        Log.d(TAG, "Show interstitial ad to the user.");
+        
+        mActivity.runOnUiThread(new Runnable() {
+            
+            @Override
+            public void run() {
+                if (mInterstitial.isLoaded()) {
+                    mInterstitial.show();
+                }
+            }
+        });
     }
     
     /**
@@ -134,7 +195,7 @@ public final class AdMob extends AdListener {
         } else if ("SMART_BANNER".equals(adSize)) {
             return AdSize.SMART_BANNER;
         }
-
+        
         return null;
     }
 }
