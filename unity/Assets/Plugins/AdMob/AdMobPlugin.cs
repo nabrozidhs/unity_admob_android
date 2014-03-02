@@ -15,8 +15,8 @@ public sealed class AdMobPlugin : MonoBehaviour {
 
 	public static event Action AdLoaded = delegate{};
 	public static event Action InterstitialLoaded = delegate{};
-
-#if UNITY_ANDROID
+	
+#if UNITY_ANDROID && !UNITY_EDITOR
 	private AndroidJavaObject plugin;
 #endif
 
@@ -24,7 +24,7 @@ public sealed class AdMobPlugin : MonoBehaviour {
 	/// Bind this instance.
 	/// </summary>
 	public void CreateBanner(string adUnitId, AdSize adSize, bool isTopPosition, string interstitialId = "") {
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_EDITOR
 		plugin = new AndroidJavaObject(
 			CLASS_NAME,
 			new AndroidJavaClass("com.unity3d.player.UnityPlayer")
@@ -42,7 +42,7 @@ public sealed class AdMobPlugin : MonoBehaviour {
 	/// after we have created a banner.
 	/// </summary>
 	public void RequestAd() {
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_EDITOR
 		if (plugin != null) {
 			plugin.Call(CALL_REQUEST_AD, new object[0]);
 		}
@@ -53,7 +53,7 @@ public sealed class AdMobPlugin : MonoBehaviour {
 	/// Requests an interstitial ad.
 	/// </summary>
 	public void RequestInterstitial() {
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_EDITOR
 		if (plugin != null) {
 			plugin.Call(CALL_REQUEST_INTERSTITIAL, new object[0]);
 		}
@@ -64,7 +64,7 @@ public sealed class AdMobPlugin : MonoBehaviour {
 	/// Shows the banner to the user.
 	/// </summary>
 	public void ShowBanner() {
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_EDITOR
 		if (plugin != null) {
 			plugin.Call(CALL_SHOW_BANNER, new object[0]);
 		}
@@ -75,7 +75,7 @@ public sealed class AdMobPlugin : MonoBehaviour {
 	/// Hides the banner from the user.
 	/// </summary>
 	public void HideBanner() {
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_EDITOR
 		if (plugin != null) {
 			plugin.Call(CALL_HIDE_BANNER, new object[0]);
 		}
@@ -86,7 +86,7 @@ public sealed class AdMobPlugin : MonoBehaviour {
 	/// Shows the interstitial ad to the user.
 	/// </summary>
 	public void ShowInterstitial() {
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_EDITOR
 		if (plugin != null) {
 			plugin.Call(CALL_SHOW_INSTERTITIAL, new object[0]);
 		}
