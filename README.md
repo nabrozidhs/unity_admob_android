@@ -20,18 +20,25 @@ Open your app's manifest file and add the following tag as a child of the `<appl
            android:value="@integer/google_play_services_version" />
 ```
 
-You'll also need to add the following Activity:
+Add the following Activity:
 ```xml
 <activity android:name="com.google.android.gms.ads.AdActivity"
           android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
 ```
 
-And the following permissions
+Add following permissions
 ```xml
 <uses-permission android:name="android.permission.INTERNET"/>
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 ```
 This is specified on the [Android documentation](https://developers.google.com/mobile-ads-sdk/docs/) as well.
+
+And finally you'll also need to add or modify the metadata information for the `UnityPlayerNativeActivity`
+otherwise the ads won't be clickable.
+
+```xml
+<meta-data android:name="unityplayer.ForwardNativeEventsToDalvik" android:value="true" />
+```
 
 ### Examples
 
