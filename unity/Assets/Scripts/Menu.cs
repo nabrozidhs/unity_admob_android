@@ -18,7 +18,7 @@ public class Menu : MonoBehaviour {
 	void Start() {
 #if !UNITY_EDITOR
 		admob = GetComponent<AdMobPlugin>();
-		admob.CreateBanner(AD_UNIT_ID, AdMobPlugin.AdSize.SMART_BANNER, true, INTERSTITIAL_ID);
+		admob.CreateBanner(AD_UNIT_ID, AdMobPlugin.AdSize.SMART_BANNER, true, INTERSTITIAL_ID, false);
 		admob.RequestAd();
 #endif
 
