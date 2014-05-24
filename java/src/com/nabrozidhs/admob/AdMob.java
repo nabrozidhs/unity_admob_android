@@ -1,6 +1,10 @@
 package com.nabrozidhs.admob;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import android.app.Activity;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -22,6 +26,8 @@ public final class AdMob extends AdListener {
     private final AdView mAdView;
     private final InterstitialAd mInterstitial;
     private final String mCallbackName;
+    private final boolean isTestingDevice;
+    
     
     /**
      * Constructor for the AdMob class that holds the ads.
@@ -39,15 +45,20 @@ public final class AdMob extends AdListener {
      *            Your interstitial ID from the AdMob console.
      * @param callbackName
      *            the game object that should listen for ad events.
+     * @param isTestDevice
+     * 			  Tell if the device is a testing device to avoid being banned from
+     * 			  AdMob.
      */
     public AdMob(final Activity activity, final String adUnitId, final String adSize,
-            final boolean isTopPosition, final String interstitialId, final String callbackName) {
+            final boolean isTopPosition, final String interstitialId, final String callbackName,
+            final boolean isTestDevice) {
         mActivity = activity;
         mCallbackName = callbackName;
+        isTestingDevice = isTestDevice;
         
         mAdView = new AdView(activity);
         mAdView.setAdSize(parseAdSize(adSize));
-        mAdView.setAdUnitId(adUnitId);
+        mAdView.setAdUnitId(adUnitId);        
         mAdView.setVisibility(View.GONE);
         mAdView.setAdListener(new AdListener() {
             
@@ -101,7 +112,24 @@ public final class AdMob extends AdListener {
             
             @Override
             public void run() {
-                mAdView.loadAd(new AdRequest.Builder().build());
+                //mAdView.loadAd(new AdRequest.Builder().build());
+                
+                // Create an ad request. Check logcat output for the hashed device ID to
+                // get test ads on a physical device.
+            	AdRequest adRequest = null;
+            	if(isTestingDevice){
+            		adRequest = new AdRequest.Builder()
+                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                    .addTestDevice(getAdmobDeviceId())
+                    .build();
+            	}else{
+            		adRequest = new AdRequest.Builder()
+                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                    .build();
+            	}
+
+                // Start loading the ad in the background.
+                mAdView.loadAd(adRequest);                
             }
         });
     }
@@ -120,7 +148,23 @@ public final class AdMob extends AdListener {
             
             @Override
             public void run() {
-                mInterstitial.loadAd(new AdRequest.Builder().build());
+                //mInterstitial.loadAd(new AdRequest.Builder().build());
+                
+                // Create an ad request. Check logcat output for the hashed device ID to
+                // get test ads on a physical device.
+            	AdRequest adRequest = null;
+            	if(isTestingDevice){
+            		adRequest = new AdRequest.Builder()
+                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                    .addTestDevice(getAdmobDeviceId())
+                    .build();
+            	}else{
+            		adRequest = new AdRequest.Builder()
+                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                    .build();
+            	}
+                
+                mInterstitial.loadAd(adRequest);
             }
         });
     }
@@ -197,5 +241,37 @@ public final class AdMob extends AdListener {
         }
         
         return null;
+    }
+    
+    private final String getAdmobDeviceId() {
+    	
+        String android_id = Settings.Secure.getString(mActivity.getContentResolver(), Settings.Secure.ANDROID_ID);
+        String deviceId = md5(android_id).toUpperCase();
+        
+        return deviceId;
+    }
+    
+    private static final String md5(final String s) {
+        try {
+            // Create MD5 Hash
+            MessageDigest digest = java.security.MessageDigest
+                    .getInstance("MD5");
+            digest.update(s.getBytes());
+            byte messageDigest[] = digest.digest();
+
+            // Create Hex String
+            StringBuffer hexString = new StringBuffer();
+            for (int i = 0; i < messageDigest.length; i++) {
+                String h = Integer.toHexString(0xFF & messageDigest[i]);
+                while (h.length() < 2)
+                    h = "0" + h;
+                hexString.append(h);
+            }
+            return hexString.toString();
+
+        } catch (NoSuchAlgorithmException e) {
+            //Logger.logStackTrace(TAG,e);
+        }
+        return "";
     }
 }

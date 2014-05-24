@@ -23,7 +23,11 @@ public sealed class AdMobPlugin : MonoBehaviour {
 	/// <summary>
 	/// Bind this instance.
 	/// </summary>
-	public void CreateBanner(string adUnitId, AdSize adSize, bool isTopPosition, string interstitialId = "") {
+	public void CreateBanner(string adUnitId, AdSize adSize, bool isTopPosition, string interstitialId, bool isTestDevice) {
+		if (String.IsNullOrEmpty(interstitialId)) {
+			interstitialId = "";
+		}
+
 #if UNITY_ANDROID && !UNITY_EDITOR
 		plugin = new AndroidJavaObject(
 			CLASS_NAME,
@@ -33,7 +37,8 @@ public sealed class AdMobPlugin : MonoBehaviour {
 			adSize.ToString(),
 			isTopPosition,
 			interstitialId,
-			gameObject.name);
+			gameObject.name,
+			isTestDevice);
 #endif
 	}
 
