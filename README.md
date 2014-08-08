@@ -65,3 +65,15 @@ The project should now build on Eclipse.
 
 After succesfully building the Android plugin you can copy the library jar file from the
 bin folder to your Unity project at `Assets/Plugins/Android`.
+
+## Success stories
+
+This is a small list of games using this library!
+* [Micronytes Director's Cut](https://play.google.com/store/apps/details?id=com.gibsandgore.micronytesdc) by [Gibs & Gore](http://www.gibsandgore.com).
+* [Rocket Roy](https://play.google.com/store/apps/details?id=com.JossHarrisGames.RocketRoy) by [Joss Harris Games](http://jossharris.wordpress.com/games/).
+
+If you are using this library and you want to appear on this list feel free to create a [request](/issues).
+
+## Problem / Feature request?
+
+Open up an [issue](/issues).
