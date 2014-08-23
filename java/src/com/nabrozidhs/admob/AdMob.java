@@ -2,8 +2,12 @@ package com.nabrozidhs.admob;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
+import android.content.Context;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
@@ -27,7 +31,6 @@ public final class AdMob extends AdListener {
     private final InterstitialAd mInterstitial;
     private final String mCallbackName;
     private final boolean isTestingDevice;
-    
     
     /**
      * Constructor for the AdMob class that holds the ads.
@@ -58,14 +61,43 @@ public final class AdMob extends AdListener {
         
         mAdView = new AdView(activity);
         mAdView.setAdSize(parseAdSize(adSize));
-        mAdView.setAdUnitId(adUnitId);        
+        mAdView.setAdUnitId(adUnitId);
         mAdView.setVisibility(View.GONE);
         mAdView.setAdListener(new AdListener() {
+            
+            @Override
+            public void onAdClosed() {
+                if (mCallbackName != null) {
+                    UnityPlayer.UnitySendMessage(mCallbackName, "onAdClosed", "");
+                }
+            }
+            
+            @Override
+            public void onAdFailedToLoad(int errorCode) {
+                if (mCallbackName != null) {
+                    UnityPlayer.UnitySendMessage(mCallbackName, "OnAdFailedToLoad",
+                            Integer.toString(errorCode));
+                }
+            }
+            
+            @Override
+            public void onAdLeftApplication() {
+                if (mCallbackName != null) {
+                    UnityPlayer.UnitySendMessage(mCallbackName, "OnAdLeftApplication", "");
+                }
+            }
             
             @Override
             public void onAdLoaded() {
                 if (mCallbackName != null) {
                     UnityPlayer.UnitySendMessage(mCallbackName, "OnAdLoaded", "");
+                }
+            }
+            
+            @Override
+            public void onAdOpened() {
+                if (mCallbackName != null) {
+                    UnityPlayer.UnitySendMessage(mCallbackName, "OnAdOpened", "");
                 }
             }
         });
@@ -76,15 +108,46 @@ public final class AdMob extends AdListener {
             mInterstitial.setAdListener(new AdListener() {
                 
                 @Override
+                public void onAdClosed() {
+                    if (mCallbackName != null) {
+                        UnityPlayer.UnitySendMessage(mCallbackName, "OnInterstitialClosed", "");
+                    }
+                }
+                
+                @Override
+                public void onAdFailedToLoad(final int errorCode) {
+                    if (mCallbackName != null) {
+                        UnityPlayer.UnitySendMessage(mCallbackName, "OnInterstitialFailedToLoad",
+                                Integer.toString(errorCode));
+                    }
+                }
+                
+                @Override
+                public void onAdLeftApplication() {
+                    if (mCallbackName != null) {
+                        UnityPlayer.UnitySendMessage(mCallbackName, "OnInterstitialLeftApplication", "");
+                    }
+                }
+                
+                @Override
                 public void onAdLoaded() {
                     if (mCallbackName != null) {
                         UnityPlayer.UnitySendMessage(mCallbackName, "OnInterstitialLoaded", "");
+                    }
+                }
+                
+                @Override
+                public void onAdOpened() {
+                    if (mCallbackName != null) {
+                        UnityPlayer.UnitySendMessage(mCallbackName, "OnInterstitialOpened", "");
                     }
                 }
             });
         } else {
             mInterstitial = null;
         }
+        
+        final CountDownLatch latch = new CountDownLatch(1);
         
         mActivity.runOnUiThread(new Runnable() {
             
@@ -98,8 +161,16 @@ public final class AdMob extends AdListener {
                 mActivity.addContentView(layout, layoutParams);
                 layout.addView(mAdView, new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+                
+                latch.countDown();
             }
         });
+        
+        try {
+            latch.await(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Log.e(TAG, e.getMessage(), e);
+        }
     }
 
     /**
@@ -116,20 +187,16 @@ public final class AdMob extends AdListener {
                 
                 // Create an ad request. Check logcat output for the hashed device ID to
                 // get test ads on a physical device.
-            	AdRequest adRequest = null;
-            	if(isTestingDevice){
-            		adRequest = new AdRequest.Builder()
-                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                    .addTestDevice(getAdmobDeviceId())
-                    .build();
-            	}else{
-            		adRequest = new AdRequest.Builder()
-                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                    .build();
-            	}
+                final AdRequest.Builder adRequestBuilder = new AdRequest.Builder()
+                        .addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
+                
+                if (isTestingDevice) {
+                    adRequestBuilder.addTestDevice(getAdmobDeviceId(
+                            mActivity.getApplicationContext()));
+                }
 
                 // Start loading the ad in the background.
-                mAdView.loadAd(adRequest);                
+                mAdView.loadAd(adRequestBuilder.build());
             }
         });
     }
@@ -148,23 +215,18 @@ public final class AdMob extends AdListener {
             
             @Override
             public void run() {
-                //mInterstitial.loadAd(new AdRequest.Builder().build());
                 
                 // Create an ad request. Check logcat output for the hashed device ID to
                 // get test ads on a physical device.
-            	AdRequest adRequest = null;
-            	if(isTestingDevice){
-            		adRequest = new AdRequest.Builder()
-                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                    .addTestDevice(getAdmobDeviceId())
-                    .build();
-            	}else{
-            		adRequest = new AdRequest.Builder()
-                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                    .build();
-            	}
+                final AdRequest.Builder adRequestBuilder = new AdRequest.Builder()
+                        .addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
                 
-                mInterstitial.loadAd(adRequest);
+                if (isTestingDevice) {
+                    adRequestBuilder.addTestDevice(getAdmobDeviceId(
+                            mActivity.getApplicationContext()));
+                }
+                
+                mInterstitial.loadAd(adRequestBuilder.build());
             }
         });
     }
@@ -225,7 +287,7 @@ public final class AdMob extends AdListener {
      * 
      * @param adSize
      * 
-     * @return the resulting {@link AdSize}
+     * @return the parsed {@link AdSize}.
      */
     private static AdSize parseAdSize(final String adSize) {
         if ("BANNER".equals(adSize)) {
@@ -243,10 +305,11 @@ public final class AdMob extends AdListener {
         return null;
     }
     
-    private final String getAdmobDeviceId() {
-    	
-        String android_id = Settings.Secure.getString(mActivity.getContentResolver(), Settings.Secure.ANDROID_ID);
-        String deviceId = md5(android_id).toUpperCase();
+    private static final String getAdmobDeviceId(final Context context) {
+        
+        final String android_id = Settings.Secure.getString(
+                context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        final String deviceId = md5(android_id).toUpperCase(Locale.US);
         
         return deviceId;
     }
@@ -263,15 +326,17 @@ public final class AdMob extends AdListener {
             StringBuffer hexString = new StringBuffer();
             for (int i = 0; i < messageDigest.length; i++) {
                 String h = Integer.toHexString(0xFF & messageDigest[i]);
-                while (h.length() < 2)
+                while (h.length() < 2) {
                     h = "0" + h;
+                }
                 hexString.append(h);
             }
             return hexString.toString();
 
         } catch (NoSuchAlgorithmException e) {
-            //Logger.logStackTrace(TAG,e);
+            Log.e(TAG, e.getMessage(), e);
         }
+        
         return "";
     }
 }
