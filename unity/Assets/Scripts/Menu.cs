@@ -16,11 +16,13 @@ public class Menu : MonoBehaviour {
 	private AdMobPlugin admob;
 
 	void Start() {
-#if !UNITY_EDITOR
 		admob = GetComponent<AdMobPlugin>();
-		admob.CreateBanner(AD_UNIT_ID, AdMobPlugin.AdSize.SMART_BANNER, true, INTERSTITIAL_ID, false);
+		admob.CreateBanner(adUnitId: AD_UNIT_ID,
+		                   adSize: AdMobPlugin.AdSize.SMART_BANNER,
+		                   isTopPosition: true,
+		                   interstitialId: INTERSTITIAL_ID,
+		                   isTestDevice: true);
 		admob.RequestAd();
-#endif
 
 		buttonPositionShowAds = new Rect(
 			(Screen.width - BUTTON_SIZE.x) / 2,
@@ -37,6 +39,16 @@ public class Menu : MonoBehaviour {
 	}
 
 	void OnEnable() {
+		AdMobPlugin.AdClosed += () => { Debug.Log ("AdClosed"); };
+		AdMobPlugin.AdFailedToLoad += () => { Debug.Log ("AdFailedToLoad"); };
+		AdMobPlugin.AdLeftApplication += () => { Debug.Log ("AdLeftApplication"); };
+		AdMobPlugin.AdOpened += () => { Debug.Log ("AdOpened"); };
+
+		AdMobPlugin.InterstitialClosed += () => { Debug.Log ("InterstitialClosed"); };
+		AdMobPlugin.InterstitialFailedToLoad += () => { Debug.Log ("InterstitialFailedToLoad"); };
+		AdMobPlugin.InterstitialLeftApplication += () => { Debug.Log ("InterstitialLeftApplication"); };
+		AdMobPlugin.InterstitialOpened += () => { Debug.Log ("InterstitialOpened"); };
+
 		AdMobPlugin.AdLoaded += HandleAdLoaded;
 		AdMobPlugin.InterstitialLoaded += HandleInterstitialLoaded;
 	}

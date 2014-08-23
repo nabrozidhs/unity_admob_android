@@ -13,8 +13,17 @@ public sealed class AdMobPlugin : MonoBehaviour {
 
 	public enum AdSize {BANNER, MEDIUM_RECTANGLE, FULL_BANNER, LEADERBOARD, SMART_BANNER};
 
+	public static event Action AdClosed = delegate{};
+	public static event Action AdFailedToLoad = delegate{};
+	public static event Action AdLeftApplication = delegate{};
 	public static event Action AdLoaded = delegate{};
+	public static event Action AdOpened = delegate{};
+
+	public static event Action InterstitialClosed = delegate{};
+	public static event Action InterstitialFailedToLoad = delegate{};
+	public static event Action InterstitialLeftApplication = delegate{};
 	public static event Action InterstitialLoaded = delegate{};
+	public static event Action InterstitialOpened = delegate{};
 	
 #if UNITY_ANDROID && !UNITY_EDITOR
 	private AndroidJavaObject plugin;
@@ -23,7 +32,7 @@ public sealed class AdMobPlugin : MonoBehaviour {
 	/// <summary>
 	/// Bind this instance.
 	/// </summary>
-	public void CreateBanner(string adUnitId, AdSize adSize, bool isTopPosition, string interstitialId, bool isTestDevice) {
+	public void CreateBanner(string adUnitId, AdSize adSize, bool isTopPosition=true, string interstitialId="", bool isTestDevice=false) {
 		if (String.IsNullOrEmpty(interstitialId)) {
 			interstitialId = "";
 		}
@@ -98,11 +107,43 @@ public sealed class AdMobPlugin : MonoBehaviour {
 #endif
 	}
 
+	public void OnAdClosed() {
+		AdClosed();
+	}
+
+	public void OnAdFailedToLoad() {
+		AdFailedToLoad();
+	}
+
+	public void OnAdLeftApplication() {
+		AdLeftApplication();
+	}
+
 	public void OnAdLoaded() {
 		AdLoaded();
 	}
 
+	public void OnAdOpened() {
+		AdOpened();
+	}
+	
+	public void OnInterstitialClosed() {
+		InterstitialClosed();
+	}
+	
+	public void OnInterstitialFailedToLoad() {
+		InterstitialFailedToLoad();
+	}
+	
+	public void OnInterstitialLeftApplication() {
+		InterstitialLeftApplication();
+	}
+	
 	public void OnInterstitialLoaded() {
 		InterstitialLoaded();
+	}
+	
+	public void OnInterstitialOpened() {
+		InterstitialOpened();
 	}
 }
