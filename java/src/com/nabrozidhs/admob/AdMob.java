@@ -68,7 +68,7 @@ public final class AdMob extends AdListener {
             @Override
             public void onAdClosed() {
                 if (mCallbackName != null) {
-                    UnityPlayer.UnitySendMessage(mCallbackName, "onAdClosed", "");
+                    UnityPlayer.UnitySendMessage(mCallbackName, "OnAdClosed", "");
                 }
             }
             
