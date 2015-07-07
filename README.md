@@ -30,7 +30,7 @@ Also the following permissions under the `<manifest>` tag:
 <uses-permission android:name="android.permission.INTERNET"/>
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 ```
-This is specified on the [Android documentation](https://developers.google.com/mobile-ads-sdk/docs/) as well.
+This is specified on the [Android documentation](https://developers.google.com/admob/android/quick-start#modify_the_manifest_file) as well.
 
 And finally you'll need to add or modify the metadata information for the `UnityPlayerNativeActivity`
 otherwise the ads won't be clickable.
@@ -51,7 +51,7 @@ The Unity package provides an example script on how to use this plugin.
 #### Installation
 
 1. Make sure that Android SDK is correctly installed and that the `Google Play services`
-package is downloaded as specified on the [Android documentation](https://developers.google.com/admob/android/quick-start#modify_the_manifest_file).
+package is downloaded as specified on the [Android documentation](https://developer.android.com/google/play-services/setup.html).
 2. Import the library project `google-play-services_lib` from `<ANDROID_SDK_DIR>/extras/google/google_play_services/libproject`
 to Eclipse.
 3. Copy `classes.jar` from `<UNITY_DIR>/Editor/Data/PlaybackEngines/androidplayer/bin`
