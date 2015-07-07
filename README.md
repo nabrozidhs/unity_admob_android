@@ -51,7 +51,7 @@ The Unity package provides an example script on how to use this plugin.
 #### Installation
 
 1. Make sure that Android SDK is correctly installed and that the `Google Play services`
-package is downloaded as specified on the [Android documentation](https://developer.android.com/google/play-services/setup.html).
+package is downloaded as specified on the [Android documentation](https://developers.google.com/admob/android/quick-start#modify_the_manifest_file).
 2. Import the library project `google-play-services_lib` from `<ANDROID_SDK_DIR>/extras/google/google_play_services/libproject`
 to Eclipse.
 3. Copy `classes.jar` from `<UNITY_DIR>/Editor/Data/PlaybackEngines/androidplayer/bin`
